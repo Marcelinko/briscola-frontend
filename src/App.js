@@ -1,24 +1,35 @@
-import logo from './logo.svg';
-import './App.css';
+import SocketContextProvider from 'context/SocketContext';
+import { Room } from 'pages/Room';
+import { Route, Routes } from 'react-router-dom';
+import styled from 'styled-components';
+
+import ModalContextProvider from './context/ModalContext';
+import { Home } from './pages/Home';
+import { NoPage } from './pages/NoPage';
+
+const StyledApp = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: 'Montserrat', sans-serif;
+  background-color: #1b1f40;
+`;
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <StyledApp>
+      <ModalContextProvider>
+        <SocketContextProvider>
+          <Routes>
+            <Route index element={<Home />} />
+            <Route path="/play" element={<Room />} />
+            <Route path="*" element={<NoPage />} />
+          </Routes>
+        </SocketContextProvider>
+      </ModalContextProvider>
+    </StyledApp>
   );
 }
 
