@@ -64,11 +64,18 @@ const KickButton = styled.button`
   cursor: pointer;
 `;
 
-export const UsersDrawer = ({ owner, users, kickUser }) => {
-  const { openModal } = useContext(ModalContext);
+export const UsersDrawer = ({ owner, users, roomId }) => {
   const socket = useContext(SocketContext);
+  const { openModal, closeModal } = useContext(ModalContext);
   const isRoomOwner = owner === socket.id;
-  //TODO: show max players by getting game.maxPlayers
+
+  const kickUser = (userId) => {
+    socket.emit('room:kickUser', { roomId, userId: userId }, (err) => {
+      if (err) openModal(err.error);
+      else closeModal();
+    });
+  };
+
   return (
     <Content>
       <UserList>

@@ -1,4 +1,6 @@
-import { useRef } from 'react';
+import { ModalContext } from 'context/ModalContext';
+import { SocketContext } from 'context/SocketContext';
+import { useContext, useRef } from 'react';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import styled from 'styled-components';
@@ -36,6 +38,24 @@ const MessageInputWrapper = styled.div`
   margin-bottom: 10px;
   box-sizing: border-box;
   box-shadow: 0 0 6px rgba(27, 31, 64, 0.6);
+`;
+
+const MessageDiv = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 5px;
+`;
+
+const MessageSender = styled.p`
+  line-height: 20px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin: 0px;
+  padding: 0px;
+  font-weight: 500;
+  color: #ffffff;
 `;
 
 const MessageInput = styled.textarea`
@@ -78,11 +98,14 @@ const ScrollDownButton = styled.button`
   cursor: pointer;
 `;
 
-export const ChatDrawer = ({ messages, sendMessage }) => {
+export const Chat = ({ roomId }) => {
   const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([]);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const messageListRef = useRef(null);
   const textareaRef = useRef(null);
+  const socket = useContext(SocketContext);
+  const { openModal } = useContext(ModalContext);
 
   const onMessageChange = (e) => {
     setMessage(e.target.value);
@@ -124,9 +147,31 @@ export const ChatDrawer = ({ messages, sendMessage }) => {
     });
   };
 
+  const removeLastMessage = () => {
+    const firstGroup = messages[0];
+    const newGroup = [...firstGroup.group.slice(1)];
+    if (newGroup.length > 0) {
+      setMessages((messages) => [{ sender: firstGroup.sender, group: newGroup }, ...messages.slice(1)]);
+    } else {
+      setMessages((messages) => messages.slice(1));
+    }
+  };
+
+  const sendMessage = (message) => {
+    socket.emit('room:sendMessage', { roomId, message }, (err) => {
+      if (err) openModal(<p>{err.error}</p>);
+    });
+  };
+
   const onMessageSend = () => {
     sendMessage(message);
     setMessage('');
+    const totalMessageCount = messages.reduce((acc, group) => {
+      return acc + group.group.length;
+    }, 0);
+    if (totalMessageCount >= 100) {
+      removeLastMessage();
+    }
   };
 
   const onEnterDown = (e) => {
@@ -136,15 +181,43 @@ export const ChatDrawer = ({ messages, sendMessage }) => {
     }
   };
 
-  //TODO: implement server restart on backend so potential empty rooms can be deleted
-  //TODO: add mute button for room
+  useEffect(() => {
+    socket.on('room:newMessage', (message) => {
+      setMessages((messages) => {
+        if (message.sender === 'system') {
+          return [...messages, { sender: message.sender, group: [message] }];
+        } else {
+          const lastMessage = messages[messages.length - 1];
+          if (
+            lastMessage &&
+            lastMessage.sender.id === message.sender.id &&
+            message.timestamp - lastMessage.group[lastMessage.group.length - 1].timestamp < 15000
+          ) {
+            const lastGroup = messages[messages.length - 1].group;
+            const newGroup = [...lastGroup, message];
+            return [...messages.slice(0, -1), { sender: message.sender, group: newGroup }];
+          } else {
+            return [...messages, { sender: message.sender, group: [message] }];
+          }
+        }
+      });
+    });
+    return () => {
+      socket.off('room:newMessage');
+    };
+  }, [socket]);
 
   return (
     <Content>
       <MessageList ref={messageListRef}>
-        {messages.map((message, index) =>
-          message.sender === 'system' ? <SystemMessage key={index} message={message} /> : <Message key={index} message={message} />
-        )}
+        {messages.map((group) => (
+          <MessageDiv>
+            {group.sender !== 'system' && <MessageSender>{group.sender.nickname}</MessageSender>}
+            {group.group.map((message) =>
+              message.sender === 'system' ? <SystemMessage message={message} /> : <Message message={message} />
+            )}
+          </MessageDiv>
+        ))}
         {!isAtBottom && (
           <ScrollDownButton onClick={scrollToBottom}>
             <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

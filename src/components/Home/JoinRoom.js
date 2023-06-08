@@ -73,10 +73,10 @@ export const JoinRoom = () => {
   const joinRoom = () => {
     socket.emit('room:join', { roomId, uuid: getUUID(), nickname }, (err, room) => {
       if (err) {
-        navigate('/');
-        openModal(err.error);
+        navigate('/', { replace: true });
+        openModal(<p>{err.error}</p>);
       } else {
-        navigate('/play', { state: { room } });
+        navigate('/play', { replace: true, state: { room } });
       }
     });
   };
