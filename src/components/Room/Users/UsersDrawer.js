@@ -71,7 +71,7 @@ export const UsersDrawer = ({ owner, users, roomId }) => {
 
   const kickUser = (userId) => {
     socket.emit('room:kickUser', { roomId, userId: userId }, (err) => {
-      if (err) openModal(err.error);
+      if (err) openModal(<p>{err.error}</p>);
       else closeModal();
     });
   };

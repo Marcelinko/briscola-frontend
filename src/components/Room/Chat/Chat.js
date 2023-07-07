@@ -191,7 +191,7 @@ export const Chat = ({ roomId }) => {
           if (
             lastMessage &&
             lastMessage.sender.id === message.sender.id &&
-            message.timestamp - lastMessage.group[lastMessage.group.length - 1].timestamp < 15000
+            message.timestamp - lastMessage.group[lastMessage.group.length - 1].timestamp < 5000
           ) {
             const lastGroup = messages[messages.length - 1].group;
             const newGroup = [...lastGroup, message];

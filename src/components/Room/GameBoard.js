@@ -19,33 +19,83 @@ export const GameBoard = ({ roomId }) => {
   const [hand, setHand] = useState([]);
   const [game, setGame] = useState({});
   const [round, setRound] = useState({});
-
+  //TODO: IF GAME status IS WAITING SHOW START GAME BUTTON
   const socket = useContext(SocketContext);
   useEffect(() => {
-    socket.on('briscola:game', (data) => {
-      setGame(data);
-    });
-    socket.on('briscola:hand', (data) => {
-      setHand(data);
-    });
-    socket.on('briscola:turn', (data) => {
-      console.log(data);
-    });
-    socket.on('briscola:round', (data) => {
-      console.log(data);
-      setRound(data);
+    socket.on('briscola:dealGame', (game) => {
+      setGame(game);
+      console.log(game);
+      console.log('Deal cards for the start of the game');
+      //TODO: Fire animation to deal cards
     });
 
+    socket.on('briscola:dealRound', (game) => {
+      setGame(game);
+      console.log('Deal cards for the start of the round');
+      //TODO: Fire animation to deal cards
+    });
+
+    socket.on('briscola:turn', (data) => {});
+
+    socket.on('briscola:turnTimer', (time) => {
+      console.log(time);
+    });
+
+    socket.on('briscola:hand', (hand) => {
+      setHand(hand);
+    });
+
+    socket.on('briscola:stopGame', () => {
+      console.log('Game stopped');
+      setGame({});
+      setRound({});
+      setHand([]);
+      //TODO: Fire animation to clear board
+    });
+
+    socket.on('briscola:roundWinner', (winner) => {
+      console.log('Round winner');
+      console.log(winner);
+    });
+
+    socket.on('briscola:teamCards', (teamCards) => {
+      console.log('Team cards');
+      console.log(teamCards);
+    });
+
+    socket.on('briscola:gameWinner', (winner) => {
+      console.log('Game winner');
+      console.log(winner);
+    });
+
+    //briscola:playCard
+    //briscola:roundComplete
+    //briscola:showdown
+    //briscola:nextRound
+
     return () => {
-      socket.off('briscola:game');
+      socket.off('briscola:dealGame');
+      socket.off('briscola:dealRound');
       socket.off('briscola:hand');
       socket.off('briscola:turn');
-      socket.off('briscola:round');
+      socket.off('briscola:turnTimer');
+      socket.off('briscola:stopGame');
+      socket.off('briscola:roundWinner');
+      socket.off('briscola:teamCards');
+      socket.off('briscola:gameWinner');
     };
   }, [socket]);
 
   const startGame = () => {
     socket.emit('briscola:start', { roomId: roomId }, (err) => {
+      if (err) {
+        console.log(err);
+      }
+    });
+  };
+
+  const stopGame = () => {
+    socket.emit('briscola:stop', { roomId: roomId }, (err) => {
       if (err) {
         console.log(err);
       }
@@ -63,6 +113,7 @@ export const GameBoard = ({ roomId }) => {
   return (
     <Board>
       <button onClick={startGame}>Start game</button>
+      <button onClick={stopGame}>Stop game</button>
       <div style={{ display: 'flex' }}>
         {hand.map((card, index) => (
           <div key={index} onClick={() => playCard(card)}>
@@ -71,13 +122,11 @@ export const GameBoard = ({ roomId }) => {
         ))}
       </div>
       <div>
-        Trump card
         {game.trumpCard && (
           <div>
             <BriscolaCard card={game.trumpCard} />
           </div>
         )}
-        {game.turn && <div>Turn: {game.turn.nickname}</div>}
         {round.roundCards && (
           <div>
             Played cards:
@@ -89,6 +138,7 @@ export const GameBoard = ({ roomId }) => {
             ))}
           </div>
         )}
+        {game.currentPlayer && <div>Turn: {game.currentPlayer.nickname}</div>}
       </div>
     </Board>
   );

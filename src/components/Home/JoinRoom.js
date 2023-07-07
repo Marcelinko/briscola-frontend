@@ -73,6 +73,7 @@ export const JoinRoom = () => {
   const joinRoom = () => {
     socket.emit('room:join', { roomId, uuid: getUUID(), nickname }, (err, room) => {
       if (err) {
+        //TODO: Don't always navigate, read specific errors and handle them
         navigate('/', { replace: true });
         openModal(<p>{err.error}</p>);
       } else {

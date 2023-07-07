@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import ButtonWithHoverEffect from 'components/Reusable/ButtonAnimatedTest';
 import { Chat } from 'components/Room/Chat/Chat';
 import { GameBoard } from 'components/Room/GameBoard';
 import { UsersDrawer } from 'components/Room/Users/UsersDrawer';
@@ -91,11 +92,18 @@ export const Room = () => {
     socket.emit('room:leave', { roomId: room.id });
   };
 
+  const shuffleUsers = () => {
+    socket.emit('room:shuffleUsers', { roomId: room.id }, (err) => {
+      if (err) {
+        openModal(<p>{err.error}</p>);
+      }
+    });
+  };
+
   useEffect(() => {
     const room = location.state?.room;
-    console.log(room);
     if (location.state) {
-      setRoom(location.state.room);
+      setRoom(room);
     }
   }, [location.state]);
 
@@ -127,7 +135,9 @@ export const Room = () => {
       <UsersDrawer owner={room.owner} users={room.users} roomId={room.id} />
       <GameContent>
         <GameDetails>
+          <ButtonWithHoverEffect />
           <LeaveRoomButton onClick={handleLeaveRoom}>Leave room</LeaveRoomButton>
+          <LeaveRoomButton onClick={shuffleUsers}>Shuffle users</LeaveRoomButton>
           <InviteButton onClick={handleCopyUrl}>
             <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
