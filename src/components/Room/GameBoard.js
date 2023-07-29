@@ -3,7 +3,7 @@ import Card from 'models/Card';
 import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import BriscolaCard from 'components/BriscolaCard';
+import BriscolaCard from 'components/Reusable/BriscolaCard';
 
 const Board = styled.div`
   width: 100%;
@@ -18,7 +18,6 @@ const Board = styled.div`
 export const GameBoard = ({ roomId }) => {
   const [hand, setHand] = useState([]);
   const [game, setGame] = useState({});
-  const [round, setRound] = useState({});
   //TODO: IF GAME status IS WAITING SHOW START GAME BUTTON
   const socket = useContext(SocketContext);
   useEffect(() => {
@@ -38,7 +37,7 @@ export const GameBoard = ({ roomId }) => {
     socket.on('briscola:turn', (data) => {});
 
     socket.on('briscola:turnTimer', (time) => {
-      console.log(time);
+      //console.log(time);
     });
 
     socket.on('briscola:hand', (hand) => {
@@ -48,13 +47,11 @@ export const GameBoard = ({ roomId }) => {
     socket.on('briscola:stopGame', () => {
       console.log('Game stopped');
       setGame({});
-      setRound({});
       setHand([]);
       //TODO: Fire animation to clear board
     });
 
     socket.on('briscola:roundWinner', (winner) => {
-      console.log('Round winner');
       console.log(winner);
     });
 
@@ -64,8 +61,11 @@ export const GameBoard = ({ roomId }) => {
     });
 
     socket.on('briscola:gameWinner', (winner) => {
-      console.log('Game winner');
       console.log(winner);
+    });
+
+    socket.on('briscola:update', (game) => {
+      setGame(game);
     });
 
     //briscola:playCard
@@ -83,6 +83,7 @@ export const GameBoard = ({ roomId }) => {
       socket.off('briscola:roundWinner');
       socket.off('briscola:teamCards');
       socket.off('briscola:gameWinner');
+      socket.off('briscola:update');
     };
   }, [socket]);
 
@@ -127,10 +128,10 @@ export const GameBoard = ({ roomId }) => {
             <BriscolaCard card={game.trumpCard} />
           </div>
         )}
-        {round.roundCards && (
+        {game.roundCards && (
           <div>
             Played cards:
-            {round.roundCards.map((card, index) => (
+            {game.roundCards.map((card, index) => (
               <div key={index}>
                 <BriscolaCard card={card.card} />
                 {card.player.nickname}

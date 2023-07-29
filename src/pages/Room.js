@@ -1,4 +1,5 @@
-import message from 'assets/message.mp3';
+import { ReactComponent as LeaveIcon } from 'assets/icons/leave.svg';
+import { ReactComponent as ShuffleIcon } from 'assets/icons/shuffle.svg';
 import { ModalContext } from 'context/ModalContext';
 import { SocketContext } from 'context/SocketContext';
 import { useContext, useState } from 'react';
@@ -6,65 +7,82 @@ import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import ButtonWithHoverEffect from 'components/Reusable/ButtonAnimatedTest';
 import { Chat } from 'components/Room/Chat/Chat';
-import { GameBoard } from 'components/Room/GameBoard';
-import { UsersDrawer } from 'components/Room/Users/UsersDrawer';
+import { Navbar } from 'components/Room/Navbar';
+import { TestBoard } from 'components/Room/TestBoard';
 
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 300px) 1fr minmax(0, 350px);
-  width: 100%;
-  max-width: 3000px;
-  gap: 10px;
-`;
-
-const GameContent = styled.div`
+const RoomContainer = styled.div`
+  padding: 0px 30px;
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100vh;
-  overflow: hidden;
-`;
-const GameDetails = styled.div`
-  display: flex;
-  gap: 10px;
-  padding: 10px 0px;
-  align-items: center;
+  height: 100%;
+  max-width: 1400px;
+  box-sizing: border-box;
 `;
 
-const LeaveRoomButton = styled.button`
-  display: flex;
-  border: none;
-  outline: none;
-  border-radius: 10px;
-  padding: 8px 10px;
-  color: #ffffff;
-  background-color: #ff5733;
-  //background-color: #d34d41;
+const InviteButton = styled.div`
   cursor: pointer;
-`;
-
-const InviteButton = styled.button`
+  position: relative;
   display: flex;
   align-items: center;
-  padding: 5px;
-  border: none;
-  outline: none;
   border-radius: 10px;
-  background-color: #21264b;
-  cursor: pointer;
-`;
-
-const UrlCopied = styled.div`
-  background-color: #21264b;
-  margin: 0px;
-  padding: 5px 10px;
-  border-radius: 10px;
-  font-size: 14px;
-  color: #ffffff;
+  height: 45px;
+  padding: 0px 10px;
+  font-size: 1em;
   font-weight: 500;
-  visibility: ${({ visible }) => (visible ? 'visible' : 'hidden')};
+  color: ${({ theme }) => theme.accentInactive};
+  background-color: ${({ theme }) => theme.secondary};
+  user-select: none;
+`;
+
+const CopiedContainer = styled.div`
+  color: #fff;
+  position: absolute;
+  padding: 10px;
+  left: 100px;
+  background-color: ${({ theme }) => theme.secondary};
+  border-radius: 10px;
+  white-space: nowrap;
+  z-index: 1;
+`;
+
+const IconButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  position: relative;
+`;
+
+const LeaveButton = styled.button`
+  display: flex;
+  cursor: pointer;
+  background-color: ${({ theme }) => theme.secondary};
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  height: 45px;
+  width: 45px;
+  color: ${({ theme }) => theme.accentInactive};
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+  &:hover {
+    color: ${({ theme }) => theme.accent};
+    background-color: ${({ theme }) => theme.secondaryBright};
+  }
+  transition: color 0.2s, background-color 0.2s;
+`;
+
+const Footer = styled.div`
+  display: flex;
+  padding: 30px;
 `;
 
 export const Room = () => {
@@ -80,16 +98,12 @@ export const Room = () => {
     setUrlCopied(true);
     setTimeout(() => {
       setUrlCopied(false);
-    }, 2000);
-  };
-
-  const handleLeaveRoom = () => {
-    leaveRoom();
-    navigate('/', { replace: true });
+    }, 5000);
   };
 
   const leaveRoom = () => {
     socket.emit('room:leave', { roomId: room.id });
+    navigate('/', { replace: true });
   };
 
   const shuffleUsers = () => {
@@ -98,6 +112,11 @@ export const Room = () => {
         openModal(<p>{err.error}</p>);
       }
     });
+  };
+
+  const isRoomFull = () => {
+    if (!room) return;
+    return room.users.length === 4;
   };
 
   useEffect(() => {
@@ -112,17 +131,19 @@ export const Room = () => {
       navigate('/', { replace: true });
     }
     socket.on('room:update', (room) => {
+      console.log(room);
       setRoom(room);
     });
 
     socket.on('room:kicked', (data) => {
-      handleLeaveRoom();
+      leaveRoom();
       openModal(<p>{data.message}</p>);
     });
 
     socket.on('room:newOwner', (data) => {
       openModal(<p>{data.message}</p>);
     });
+
     return () => {
       socket.off('room:update');
       socket.off('room:kicked');
@@ -131,28 +152,25 @@ export const Room = () => {
   }, [socket]);
 
   return (
-    <Grid>
-      <UsersDrawer owner={room.owner} users={room.users} roomId={room.id} />
-      <GameContent>
-        <GameDetails>
-          <ButtonWithHoverEffect />
-          <LeaveRoomButton onClick={handleLeaveRoom}>Leave room</LeaveRoomButton>
-          <LeaveRoomButton onClick={shuffleUsers}>Shuffle users</LeaveRoomButton>
-          <InviteButton onClick={handleCopyUrl}>
-            <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M10 8V7C10 6.05719 10 5.58579 10.2929 5.29289C10.5858 5 11.0572 5 12 5H17C17.9428 5 18.4142 5 18.7071 5.29289C19 5.58579 19 6.05719 19 7V12C19 12.9428 19 13.4142 18.7071 13.7071C18.4142 14 17.9428 14 17 14H16M7 19H12C12.9428 19 13.4142 19 13.7071 18.7071C14 18.4142 14 17.9428 14 17V12C14 11.0572 14 10.5858 13.7071 10.2929C13.4142 10 12.9428 10 12 10H7C6.05719 10 5.58579 10 5.29289 10.2929C5 10.5858 5 11.0572 5 12V17C5 17.9428 5 18.4142 5.29289 18.7071C5.58579 19 6.05719 19 7 19Z"
-                stroke="#3656FF"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </InviteButton>
-          <UrlCopied visible={urlCopied}>Invite url copied</UrlCopied>
-        </GameDetails>
-        <GameBoard game={room.game} roomId={room.id} />
-      </GameContent>
+    <RoomContainer>
+      <Navbar>
+        <InviteButton onClick={handleCopyUrl}>
+          Povabi
+          {urlCopied && <CopiedContainer>Povezava kopirana</CopiedContainer>}
+        </InviteButton>
+        {isRoomFull && (
+          <IconButton onClick={shuffleUsers}>
+            <ShuffleIcon />
+          </IconButton>
+        )}
+        <IconButton style={{ marginLeft: 'auto' }}></IconButton>
+        <LeaveButton onClick={leaveRoom}>
+          <LeaveIcon />
+        </LeaveButton>
+      </Navbar>
+      <TestBoard roomId={room.id} users={room.users} owner={room.owner} />
+      <Footer></Footer>
       <Chat roomId={room.id} />
-    </Grid>
+    </RoomContainer>
   );
 };

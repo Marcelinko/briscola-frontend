@@ -4,6 +4,8 @@ const MessageText = styled.p`
   padding: 0px;
   margin: 0px;
   font-style: italic;
+  width: fit-content;
+  word-break: break-all;
   color: ${(props) => props.color};
 `;
 
