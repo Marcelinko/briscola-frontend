@@ -32,7 +32,7 @@ const MessageTimestamp = styled.div`
 `;
 
 const MessageText = styled.div`
-  background-color: ${({ theme }) => theme.background};
+  background-color: ${({ theme }) => theme.secondary};
   color: ${({ theme }) => theme.text};
   border-radius: 10px;
   padding: 8px;

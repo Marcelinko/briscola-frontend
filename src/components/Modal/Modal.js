@@ -15,6 +15,7 @@ const ModalBackdrop = styled(motion.div)`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 10;
 `;
 
 const ModalWindow = styled(motion.div)`
@@ -59,7 +60,7 @@ export const Modal = ({ children, onClose }) => {
             exit={{ y: 50, opacity: 0, transition: { duration: 0.1, ease: 'easeIn' } }}
             key={children.type.name}
           >
-            <CloseButton onClick={onClose} size={25} top={0} right={0}>
+            <CloseButton onClick={onClose} size={25} padding={6} top={0} right={0}>
               <CloseIcon />
             </CloseButton>
             {children}

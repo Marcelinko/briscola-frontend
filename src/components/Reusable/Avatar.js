@@ -3,11 +3,11 @@ import styled from 'styled-components';
 const AvatarContainer = styled.div`
   grid-area: avatar;
   position: relative;
+  background-color: ${({ theme }) => theme.background};
   width: ${({ size }) => size}px;
   height: ${({ size }) => size}px;
   border-radius: 50%;
-  box-shadow: 0 0 5px gold;
-  border: 3px solid gold;
+  border: 3px solid ${({ theme }) => theme.primary};
   align-self: center;
 `;
 

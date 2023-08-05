@@ -21,6 +21,7 @@ const GameContainer = styled.div`
 const Board = styled.div`
   display: flex;
   position: relative;
+  max-height: 700px;
   width: 100%;
   height: 100%;
   border-radius: 100px;
@@ -154,6 +155,7 @@ export const TestBoard = ({ roomId, users, owner }) => {
   return (
     <GameContainer>
       <Board>
+        {renderPlayers()}
         {game && (
           <button onClick={startGame} style={{ position: 'absolute', top: '50%', left: '50%' }}>
             Začni igro

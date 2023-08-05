@@ -1,8 +1,11 @@
-import { ReactComponent as Ellipsis } from 'assets/icons/ellipsis.svg';
+import { ReactComponent as CloseIcon } from 'assets/icons/close.svg';
+import { ReactComponent as EllipsisIcon } from 'assets/icons/ellipsis.svg';
+import { ReactComponent as KeyIcon } from 'assets/icons/key.svg';
+import { ReactComponent as KickIcon } from 'assets/icons/kick.svg';
 import avatarImages from 'config/avatarImages';
 import { ModalContext } from 'context/ModalContext';
 import { SocketContext } from 'context/SocketContext';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import styled from 'styled-components';
 
 import { Avatar } from 'components/Reusable/Avatar';
@@ -13,8 +16,6 @@ const CardArea = styled.div`
   position: absolute;
   width: 75px;
   height: 100px;
-  border-radius: 10px;
-  border: 2px dashed grey;
 `;
 
 const PlayerContainer = styled.div`
@@ -31,132 +32,76 @@ const PlayerContainer = styled.div`
   }
   :nth-child(1) {
     top: -50px;
-    left: 100px;
+    left: 10%;
   }
   :nth-child(2) {
     top: -50px;
-    right: 100px;
+    right: 10%;
   }
   :nth-child(3) {
     bottom: -50px;
-    right: 100px;
+    right: 10%;
   }
   :nth-child(4) {
     bottom: -50px;
-    left: 100px;
-  }
-  @media (max-width: 768px) {
-    :nth-child(1) {
-      top: 100px;
-      left: -40px;
-    }
-    :nth-child(2) {
-      top: 100px;
-      right: -40px;
-    }
-    :nth-child(3) {
-      bottom: 100px;
-      left: -40px;
-    }
-    :nth-child(4) {
-      bottom: 100px;
-      right: -40px;
-    }
+    left: 10%;
   }
 `;
 
-const PlayerNickname = styled.p`
+const PlayerInfo = styled.div`
   position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: ${({ theme }) => theme.background};
+  border: 3px solid ${({ theme }) => theme.secondary};
+  border-radius: 0px 10px 10px 0px;
+  left: 90%;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+  z-index: -1;
+  padding: 15px 20px;
+`;
+
+const PlayerNickname = styled.p`
   padding: 0px;
   margin: 0px;
-  top: 100%;
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #fff;
 `;
 
-const PlayerHand = styled.div`
-  position: absolute;
-  color: #fff;
-  left: 100px;
-`;
-
-const Card = styled.div`
-  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
-  position: absolute;
-  width: 35px;
-  height: 50px;
-  border-radius: 10px;
-  background-color: #fff;
-  :nth-child(1) {
-    rotate: -20deg;
-    left: -25px;
-  }
-  :nth-child(2) {
-    z-index: 1;
-    top: -8px;
-  }
-  :nth-child(3) {
-    rotate: 20deg;
-    left: 25px;
-  }
-`;
-
-const ControlsButton = styled.button`
-  display: flex;
-  position: absolute;
-  cursor: pointer;
-  top: 0px;
-  left: 100%;
-  border: none;
-  height: 30px;
-  width: 30px;
-  background: transparent;
-  color: ${({ theme }) => theme.accentInactive};
-  svg {
-    width: 100%;
-    height: 100%;
-  }
-`;
-
-const ControlsMenu = styled.div`
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 10px;
-  background-color: grey;
-  border-radius: 10px;
-  z-index: 1;
-`;
-
-const TurnIndicator = styled.div`
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 20px;
-  height: 20px;
+const AvatarContainer = styled.div`
+  position: relative;
+  background-color: ${({ theme }) => theme.background};
+  width: ${({ size }) => size}px;
+  height: ${({ size }) => size}px;
   border-radius: 50%;
-  background-color: green;
-  z-index: 1;
+  border: 3px solid ${({ theme }) => theme.secondary};
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+  align-self: center;
 `;
 
-const TurnTimer = styled(BarTimer)`
+const AvatarWrapper = styled.div`
   position: absolute;
+  border-radius: 50%;
+  width: ${({ size }) => size}px;
+  height: ${({ size }) => size}px;
+  overflow: hidden;
+`;
+
+const AvatarImage = styled.img`
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
 `;
 
 export const Player = ({ player, isOwner, turn, playedCard }) => {
   const socket = useContext(SocketContext);
   const { openModal } = useContext(ModalContext);
-  // const renderCardsLeft = () => {
-  //   let cards = [];
-  //   for (let i = 0; i < cardsLeft; i++) {
-  //     cards.push(<Card />);
-  //   }
-  //   return cards;
-  // };
+
   // const transferOwnership = () => {
   //   socket.emit('room:transferOwnership', { roomId, userId: id }, (err) => {
   //     if (err) {
@@ -166,17 +111,15 @@ export const Player = ({ player, isOwner, turn, playedCard }) => {
   // };
   return (
     <PlayerContainer>
-      <TurnTimer timeLeft={5} />
-      <Avatar size={100} src={avatarImages[player.avatar]} />
-      <PlayerNickname>{player.nickname}</PlayerNickname>
+      <AvatarContainer size={100}>
+        <AvatarWrapper size={100}>
+          <AvatarImage src={avatarImages[player.avatar]} />
+        </AvatarWrapper>
+      </AvatarContainer>
+      <PlayerInfo>
+        <PlayerNickname>{player.nickname}</PlayerNickname>
+      </PlayerInfo>
       <CardArea>{playedCard && <BriscolaCard card={playedCard} />}</CardArea>
-      <PlayerHand>{}</PlayerHand>
-      {isOwner && (
-        <ControlsButton>
-          <Ellipsis />
-        </ControlsButton>
-      )}
-      <TurnIndicator />
     </PlayerContainer>
   );
 };

@@ -4,9 +4,14 @@ const Nav = styled.div`
   display: flex;
   padding: 30px 0px;
   margin-bottom: 30px;
-  gap: 25px;
+  gap: 15px;
+  > div:last-child {
+    margin-left: auto;
+  }
 `;
 
-export const Navbar = (props) => {
+const Navbar = (props) => {
   return <Nav>{props.children}</Nav>;
 };
+
+export default Navbar;

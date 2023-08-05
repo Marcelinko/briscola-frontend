@@ -26,9 +26,11 @@ const lightTheme = {
   text: '#fff',
   background: '#161C23',
   primary: '#FE9000',
+  primaryDarkShade: '#b36500',
   secondary: '#1D222B',
-  accent: '#91FE00',
-  normal: '#6F8695',
+  accent: '#724CF9',
+  normal: '#b1bece',
+  green: '#3EC300',
 };
 
 function App() {

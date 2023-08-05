@@ -6,18 +6,26 @@ const rotate = keyframes`
     }
 `;
 
+const SpinnerContainer = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
 const Rotate = styled.div`
-  top: 50%;
-  left: 50%;
-  position: absolute;
-  width: 30px;
-  height: 30px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
-  border: 4px solid #b9bbbe;
-  border-top-color: #2f3136;
+  border: 3px solid ${({ theme }) => theme.text};
+  border-top-color: ${({ theme }) => theme.primary};
   animation: ${rotate} 0.6s linear infinite;
 `;
 
-export default function Spinner() {
-  return <Rotate />;
-}
+const Spinner = () => {
+  return (
+    <SpinnerContainer>
+      <Rotate />
+    </SpinnerContainer>
+  );
+};
+
+export default Spinner;

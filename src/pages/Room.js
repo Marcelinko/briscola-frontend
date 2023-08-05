@@ -1,14 +1,21 @@
+import { ReactComponent as ChatIcon } from 'assets/icons/chat.svg';
+import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
+import { ReactComponent as HelpIcon } from 'assets/icons/help.svg';
 import { ReactComponent as LeaveIcon } from 'assets/icons/leave.svg';
 import { ReactComponent as ShuffleIcon } from 'assets/icons/shuffle.svg';
 import { ModalContext } from 'context/ModalContext';
 import { SocketContext } from 'context/SocketContext';
+import { AnimatePresence } from 'framer-motion';
 import { useContext, useState } from 'react';
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { IconButtonV2 } from 'components/Reusable/IconButtonV2';
+import Tooltip from 'components/Reusable/Tooltip';
 import { Chat } from 'components/Room/Chat/Chat';
-import { Navbar } from 'components/Room/Navbar';
+import Footer from 'components/Room/Footer';
+import Navbar from 'components/Room/Navbar';
 import { TestBoard } from 'components/Room/TestBoard';
 
 const RoomContainer = styled.div`
@@ -21,84 +28,58 @@ const RoomContainer = styled.div`
   box-sizing: border-box;
 `;
 
-const InviteButton = styled.div`
-  cursor: pointer;
-  position: relative;
+const UrlContainer = styled.div`
   display: flex;
+  cursor: text;
   align-items: center;
+  padding: 0px 12px;
+  gap: 12px;
   border-radius: 10px;
-  height: 45px;
-  padding: 0px 10px;
-  font-size: 1em;
+  white-space: nowrap;
+  overflow: hidden;
+  background-color: ${({ theme }) => theme.background};
+  border: 2px solid ${({ theme }) => theme.secondary};
+  color: ${({ theme }) => theme.normal};
+  font-size: 0.85rem;
   font-weight: 500;
-  color: ${({ theme }) => theme.accentInactive};
-  background-color: ${({ theme }) => theme.secondary};
-  user-select: none;
 `;
 
 const CopiedContainer = styled.div`
   color: #fff;
-  position: absolute;
-  padding: 10px;
-  left: 100px;
-  background-color: ${({ theme }) => theme.secondary};
-  border-radius: 10px;
+  position: fixed;
+  padding: 10px 16px;
+  background-color: ${({ theme }) => theme.accent};
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 500;
   white-space: nowrap;
   z-index: 1;
-`;
-
-const IconButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 35px;
-  height: 35px;
-  border: none;
-  background-color: transparent;
-  cursor: pointer;
-  position: relative;
-`;
-
-const LeaveButton = styled.button`
-  display: flex;
-  cursor: pointer;
-  background-color: ${({ theme }) => theme.secondary};
-  border: none;
-  border-radius: 10px;
-  padding: 10px;
-  height: 45px;
-  width: 45px;
-  color: ${({ theme }) => theme.accentInactive};
-  svg {
-    width: 100%;
-    height: 100%;
-  }
-  &:hover {
-    color: ${({ theme }) => theme.accent};
-    background-color: ${({ theme }) => theme.secondaryBright};
-  }
-  transition: color 0.2s, background-color 0.2s;
-`;
-
-const Footer = styled.div`
-  display: flex;
-  padding: 30px;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
 `;
 
 export const Room = () => {
   const [room, setRoom] = useState([]);
+  const [showChat, setShowChat] = useState(true);
   const [urlCopied, setUrlCopied] = useState(false);
+
   const location = useLocation();
   const navigate = useNavigate();
+
   const socket = useContext(SocketContext);
   const { openModal } = useContext(ModalContext);
 
-  const handleCopyUrl = () => {
-    navigator.clipboard.writeText(`http://localhost:3001/?id=${room.id}`);
+  const toggleChat = () => {
+    setShowChat((showChat) => !showChat);
+  };
+
+  const copyUrl = () => {
+    navigator.clipboard.writeText(`${process.env.REACT_APP_URL}/?id=${room.id}`);
     setUrlCopied(true);
     setTimeout(() => {
       setUrlCopied(false);
-    }, 5000);
+    }, 2500);
   };
 
   const leaveRoom = () => {
@@ -114,14 +95,9 @@ export const Room = () => {
     });
   };
 
-  const isRoomFull = () => {
-    if (!room) return;
-    return room.users.length === 4;
-  };
-
   useEffect(() => {
     const room = location.state?.room;
-    if (location.state) {
+    if (location.state?.room) {
       setRoom(room);
     }
   }, [location.state]);
@@ -154,23 +130,38 @@ export const Room = () => {
   return (
     <RoomContainer>
       <Navbar>
-        <InviteButton onClick={handleCopyUrl}>
-          Povabi
-          {urlCopied && <CopiedContainer>Povezava kopirana</CopiedContainer>}
-        </InviteButton>
-        {isRoomFull && (
-          <IconButton onClick={shuffleUsers}>
+        <Tooltip text="Izhod">
+          <IconButtonV2 onClick={leaveRoom}>
+            <LeaveIcon />
+          </IconButtonV2>
+        </Tooltip>
+        <UrlContainer>{`${process.env.REACT_APP_URL}/?id=${room.id}`}</UrlContainer>
+        <Tooltip text="Kopiraj povezavo">
+          <IconButtonV2 onClick={copyUrl}>
+            <CopyIcon />
+          </IconButtonV2>
+        </Tooltip>
+        <Tooltip text="Premešaj ekipe">
+          <IconButtonV2 onClick={shuffleUsers}>
             <ShuffleIcon />
-          </IconButton>
-        )}
-        <IconButton style={{ marginLeft: 'auto' }}></IconButton>
-        <LeaveButton onClick={leaveRoom}>
-          <LeaveIcon />
-        </LeaveButton>
+          </IconButtonV2>
+        </Tooltip>
+        <Tooltip text="Pogovor">
+          <IconButtonV2 onClick={toggleChat}>
+            <ChatIcon />
+          </IconButtonV2>
+        </Tooltip>
       </Navbar>
       <TestBoard roomId={room.id} users={room.users} owner={room.owner} />
-      <Footer></Footer>
-      <Chat roomId={room.id} />
+      <Footer>
+        <Tooltip text="Pomoč" position="top">
+          <IconButtonV2>
+            <HelpIcon />
+          </IconButtonV2>
+        </Tooltip>
+      </Footer>
+      <AnimatePresence>{showChat && <Chat roomId={room.id} showChat={showChat} toggleChat={toggleChat} />}</AnimatePresence>
+      {urlCopied && <CopiedContainer>Povezava kopirana</CopiedContainer>}
     </RoomContainer>
   );
 };

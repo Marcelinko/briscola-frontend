@@ -50,7 +50,8 @@ export const AvatarListModal = ({ setAvatar }) => {
   };
 
   const changeAvatar = (index) => {
-    setAvatar(index + 1);
+    setAvatar(index);
+    localStorage.setItem('avatar', index);
     closeModal();
   };
 
@@ -59,7 +60,7 @@ export const AvatarListModal = ({ setAvatar }) => {
   return (
     <AvatarsList>
       {Object.values(avatarImages).map((avatar, index) => (
-        <AvatarContainer onClick={() => changeAvatar(index)}>
+        <AvatarContainer onClick={() => changeAvatar(index + 1)}>
           <Avatar loading="lazy" onLoad={imageLoaded} src={avatar} />
         </AvatarContainer>
       ))}

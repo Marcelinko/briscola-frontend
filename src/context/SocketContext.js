@@ -17,7 +17,7 @@ const SocketContextProvider = ({ children }) => {
     setSocket(newSocket);
     newSocket.on('disconnect', () => {
       navigate('/');
-      openModal(<p>You have been disconnected from the server</p>);
+      openModal(<p>Povezava s strežnikom je bila izgubljena</p>);
     });
     return () => newSocket.close();
   }, []);

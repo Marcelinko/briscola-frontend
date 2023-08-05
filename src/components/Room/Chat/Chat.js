@@ -17,7 +17,8 @@ const ChatContainer = styled(motion.div)`
   right: 0;
   max-width: 400px;
   height: 100vh;
-  background-color: ${({ theme }) => theme.secondary};
+  background-color: ${({ theme }) => theme.background};
+
   box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
   z-index: 10;
   @media (max-width: 768px) {
@@ -51,18 +52,13 @@ const ChatToggleButton = styled.button`
   transform: translate(-100%, 0);
 `;
 
-export const Chat = ({ roomId }) => {
+export const Chat = ({ roomId, showChat, toggleChat }) => {
   const [messages, setMessages] = useState([]);
-  const [showChat, setShowChat] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
   const messageListRef = useRef(null);
 
   const socket = useContext(SocketContext);
   const { openModal } = useContext(ModalContext);
-
-  const toggleChat = () => {
-    setShowChat((showChat) => !showChat);
-  };
 
   const groupMessagess = (messages, interval) => {
     if (messages.length === 0) {

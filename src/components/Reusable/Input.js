@@ -13,4 +13,9 @@ export const Input = styled(motion.input)`
   outline: none;
   font-weight: 500;
   font-size: 18px;
+
+  ::placeholder {
+    opacity: 1;
+    color: ${(props) => props.theme.normal};
+  }
 `;
