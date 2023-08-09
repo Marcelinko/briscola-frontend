@@ -1,11 +1,10 @@
 import avatarImages from 'config/avatarImages';
 import styled from 'styled-components';
 
-import { Avatar } from 'components/Reusable/Avatar';
-
 const MessageContainer = styled.div`
   display: flex;
   gap: 10px;
+  margin-bottom: 10px;
 `;
 
 const MessageArea = styled.div`
@@ -23,6 +22,16 @@ const MessageSender = styled.div`
   color: #ffffff;
   font-size: 0.8rem;
   font-weight: 500;
+`;
+
+const AvatarWrapper = styled.div`
+  height: 50px;
+  width: 50px;
+`;
+
+const Avatar = styled.img`
+  height: 100%;
+  width: 100%;
 `;
 
 const MessageTimestamp = styled.div`
@@ -56,7 +65,9 @@ export const Message = ({ group }) => {
 
   return (
     <MessageContainer>
-      <Avatar size={40} src={avatarImages[sender.avatar]} />
+      <AvatarWrapper>
+        <Avatar src={avatarImages[sender.avatar]} />
+      </AvatarWrapper>
       <MessageArea>
         <MessageInfo>
           <MessageSender>{sender.nickname}</MessageSender>

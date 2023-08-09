@@ -1,19 +1,23 @@
+import { ReactComponent as HelpIcon } from 'assets/icons/help.svg';
+import { ModalContext } from 'context/ModalContext';
 import { SocketContext } from 'context/SocketContext';
 import Card from 'models/Card';
 import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import BriscolaCard from 'components/Reusable/BriscolaCard';
-import { CapsuleTimer } from 'components/Reusable/CapsuleTimer';
-import Hand from 'components/Reusable/Hand';
+import { Button } from 'components/Reusable/Button';
+import CapsuleTimer from 'components/Reusable/CapsuleTimer';
+import IconButton from 'components/Reusable/IconButton';
 import { Player } from 'components/Room/Player';
+
+import Footer from './Footer';
 
 const GameContainer = styled.div`
   display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
-  align-self: center;
-  justify-content: center;
   padding: 50px 0px;
   box-sizing: border-box;
 `;
@@ -21,7 +25,7 @@ const GameContainer = styled.div`
 const Board = styled.div`
   display: flex;
   position: relative;
-  max-height: 700px;
+  max-height: 800px;
   width: 100%;
   height: 100%;
   border-radius: 100px;
@@ -40,44 +44,76 @@ const Board = styled.div`
     linear-gradient(60deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1)),
     linear-gradient(120deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1));
   background-size: 70px 120px;
-  opacity: 0.9;
 `;
 
 const HandContainer = styled.div`
-  position: fixed;
-  margin-bottom: 1rem;
-  bottom: 15%;
+  position: absolute;
+  bottom: 50px;
   left: 50%;
   transform: translateX(-50%);
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
+  align-self: center;
 `;
 
-const HandWrapper = styled.div`
-  position: relative;
+const CardWrapper = styled.div`
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+  &:hover {
+    transform: translateY(-10px);
+  }
 `;
 
 export const TestBoard = ({ roomId, users, owner }) => {
-  const renderPlayers = () => {
-    if (!users) return;
-    const players = users.map((user) => {
-      const playedCard = game.roundCards?.find((roundCard) => roundCard.player.id === user.id);
-      const card = playedCard?.card;
-      return <Player player={user} key={user.id} isOwner={user.id === owner} playedCard={card} />;
-    });
-    return players;
-  };
-
   const [hand, setHand] = useState([]);
   const [game, setGame] = useState({});
   const [timeRemaining, setTimeRemaining] = useState(15);
 
   const socket = useContext(SocketContext);
+  const { openModal, closeModal } = useContext(ModalContext);
+  const isRoomOwner = owner === socket.id;
+
+  const renderPlayers = () => {
+    if (!users) return;
+    const players = users.map((user) => {
+      const isOwner = user.id === owner;
+      const playedCard = game.roundCards?.find((roundCard) => roundCard.player.id === user.id);
+      const card = playedCard?.card;
+      return (
+        <Player
+          turn={game.currentPlayer?.id === user.id}
+          showOwnerControls={!isOwner && isRoomOwner}
+          transferOwnership={transferOwnership}
+          kickUser={kickUser}
+          player={user}
+          key={user.id}
+          playedCard={card}
+          timeLeft={timeRemaining}
+          isOwner={isOwner}
+        />
+      );
+    });
+    return players;
+  };
+
+  const renderHand = () => {
+    if (!hand) return;
+    const cards = hand.map((card) => {
+      return (
+        <CardWrapper onClick={() => playCard(card)}>
+          <BriscolaCard card={card} key={card.id} />
+        </CardWrapper>
+      );
+    });
+    return cards;
+  };
 
   useEffect(() => {
-    console.log(game);
     socket.on('briscola:dealGame', (game) => {
       setGame(game);
-      console.log(game);
       console.log('Deal cards for the start of the game');
+      console.log(game);
       //TODO: Fire animation to deal cards
     });
 
@@ -129,7 +165,7 @@ export const TestBoard = ({ roomId, users, owner }) => {
   }, [socket]);
 
   const startGame = () => {
-    socket.emit('briscola:start', { roomId: roomId }, (err) => {
+    socket.emit('briscola:start', { roomId }, (err) => {
       if (err) {
         console.log(err);
       }
@@ -137,7 +173,7 @@ export const TestBoard = ({ roomId, users, owner }) => {
   };
 
   const stopGame = () => {
-    socket.emit('briscola:stop', { roomId: roomId }, (err) => {
+    socket.emit('briscola:stop', { roomId }, (err) => {
       if (err) {
         console.log(err);
       }
@@ -145,9 +181,24 @@ export const TestBoard = ({ roomId, users, owner }) => {
   };
 
   const playCard = (card) => {
-    socket.emit('briscola:playCard', { roomId: roomId, card: new Card(card.suit, card.value) }, (err) => {
+    socket.emit('briscola:playCard', { roomId, card: new Card(card.suit, card.value) }, (err) => {
       if (err) {
         console.log(err);
+      }
+    });
+  };
+
+  const kickUser = (userId) => {
+    socket.emit('room:kickUser', { roomId, userId }, (err) => {
+      if (err) openModal(<p>{err.error}</p>);
+      else closeModal();
+    });
+  };
+
+  const transferOwnership = (userId) => {
+    socket.emit('room:transferOwnership', { roomId, userId }, (err) => {
+      if (err) {
+        openModal(<p>{err.error}</p>);
       }
     });
   };
@@ -161,8 +212,14 @@ export const TestBoard = ({ roomId, users, owner }) => {
             Začni igro
           </button>
         )}
-        <Hand hand={hand} />
       </Board>
+      <Footer>
+        <IconButton tooltipText="Pomoč" tooltipPos="top">
+          <HelpIcon />
+        </IconButton>
+        <HandContainer>{renderHand()}</HandContainer>
+        {isRoomOwner && game?.gameActive && <Button onClick={stopGame}>Prekini igro</Button>}
+      </Footer>
     </GameContainer>
   );
 };

@@ -10,7 +10,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { AvatarListModal } from 'components/Modal/AvatarListModal';
 import { Button } from 'components/Reusable/Button';
-import { IconButton } from 'components/Reusable/IconButton';
 import { Input } from 'components/Reusable/Input';
 import Spinner from 'components/Reusable/Spinner';
 
@@ -51,7 +50,28 @@ const AvatarContainer = styled.div`
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  border: 3px solid white;
+  border: 5px solid ${({ theme }) => theme.secondary};
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+`;
+
+const RefreshButton = styled(motion.button)`
+  position: absolute;
+  cursor: pointer;
+  bottom: 0px;
+  right: 0px;
+  background-color: ${({ theme }) => theme.secondary};
+  color: ${({ theme }) => theme.normal};
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+  border: none;
+  outline: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  padding: 4px;
+  svg {
+    width: 100%;
+    height: 100%;
+  }
 `;
 
 const AvatarWrapper = styled.div`
@@ -134,8 +154,6 @@ export const Home = () => {
 
   const getAvatar = () => {
     let avatar = localStorage.getItem('avatar');
-    console.log(avatar);
-    console.log(typeof avatar);
     if (!avatar) {
       setAvatar(1);
     } else {
@@ -168,17 +186,15 @@ export const Home = () => {
 
   const createRoom = () => {
     setLoading(true);
-    setTimeout(() => {
-      socket.emit('room:create', { uuid: getUUID(), nickname: nickname ? nickname : nicknamePlaceholder, avatar }, (err, room) => {
-        if (err) {
-          setLoading(false);
-        } else {
-          setLoading(false);
-          localStorage.setItem('nickname', nickname ? nickname : nicknamePlaceholder);
-          navigate('/play', { replace: true, state: { room } });
-        }
-      });
-    }, 1000);
+    socket.emit('room:create', { uuid: getUUID(), nickname: nickname ? nickname : nicknamePlaceholder, avatar }, (err, room) => {
+      if (err) {
+        setLoading(false);
+      } else {
+        setLoading(false);
+        localStorage.setItem('nickname', nickname ? nickname : nicknamePlaceholder);
+        navigate('/play', { replace: true, state: { room } });
+      }
+    });
   };
 
   const joinRoom = () => {
@@ -221,9 +237,9 @@ export const Home = () => {
           <AvatarWrapper onClick={() => openModal(<AvatarListModal setAvatar={setAvatar} />)}>
             <AvatarImage src={avatarImages[avatar]} />
           </AvatarWrapper>
-          <IconButton variants={variants} animate={controls} bottom={0} right={0} size={30} onClick={randomAvatar}>
+          <RefreshButton variants={variants} animate={controls} onClick={randomAvatar}>
             <RefreshIcon />
-          </IconButton>
+          </RefreshButton>
         </AvatarContainer>
         <NicknameInputWrapper>
           <InputLabel>IME IGRALCA</InputLabel>

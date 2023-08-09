@@ -3,8 +3,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
 import styled from 'styled-components';
 
-import { IconButton } from 'components/Reusable/IconButton';
-
 const ModalBackdrop = styled(motion.div)`
   position: fixed;
   top: 0;
@@ -25,8 +23,25 @@ const ModalWindow = styled(motion.div)`
   padding: 15px;
 `;
 
-const CloseButton = styled(IconButton)`
+const CloseButton = styled.button`
+  position: absolute;
+  cursor: pointer;
+  top: 0px;
+  right: 0px;
   transform: translate(50%, -50%);
+  background-color: ${(props) => props.theme.secondary};
+  color: ${(props) => props.theme.normal};
+  width: 24px;
+  height: 24px;
+  padding: 4px;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+  border: none;
+  outline: none;
+  border-radius: 50%;
+  svg {
+    width: 100%;
+    height: 100%;
+  }
 `;
 
 const ModalContent = styled(motion.div)``;

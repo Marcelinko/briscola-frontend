@@ -2,7 +2,6 @@ import cardImages from 'config/cardImages';
 import styled from 'styled-components';
 
 const Card = styled.div`
-  position: absolute;
   width: 138px;
   height: 273px;
   border-radius: 20px;

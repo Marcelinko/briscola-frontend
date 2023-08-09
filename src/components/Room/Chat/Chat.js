@@ -1,3 +1,4 @@
+import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow-down.svg';
 import { ModalContext } from 'context/ModalContext';
 import { SocketContext } from 'context/SocketContext';
 import { motion } from 'framer-motion';
@@ -6,6 +7,8 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import styled from 'styled-components';
 
+import IconButton from 'components/Reusable/IconButton';
+
 import { Message } from './Message';
 import { MessageInput } from './MessageInput';
 import { SystemMessage } from './SystemMessage';
@@ -13,16 +16,19 @@ import { SystemMessage } from './SystemMessage';
 const ChatContainer = styled(motion.div)`
   display: flex;
   flex-direction: column;
-  position: fixed;
-  right: 0;
-  max-width: 400px;
   height: 100vh;
   background-color: ${({ theme }) => theme.background};
-
   box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
-  z-index: 10;
+  z-index: 2;
+  align-self: flex-end;
+  overflow: hidden;
+  @media (min-width: 2200px) {
+    right: 0px;
+    position: fixed;
+  }
   @media (max-width: 768px) {
-    max-width: 100%;
+    right: 0px;
+    position: fixed;
   }
 `;
 
@@ -41,20 +47,11 @@ const MessageWrapper = styled.div`
   &:first-child {
     margin-top: 10px;
   }
-  @media (max-width: 768px) {
-    width: 300px;
-  }
 `;
 
-const ChatToggleButton = styled.button`
-  position: absolute;
-  top: 50%;
-  transform: translate(-100%, 0);
-`;
-
-export const Chat = ({ roomId, showChat, toggleChat }) => {
+export const Chat = ({ roomId, showChat }) => {
   const [messages, setMessages] = useState([]);
-  const [isAtBottom, setIsAtBottom] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(true);
   const messageListRef = useRef(null);
 
   const socket = useContext(SocketContext);
@@ -134,8 +131,7 @@ export const Chat = ({ roomId, showChat, toggleChat }) => {
   const groupedMessages = groupMessagess(messages, 10000);
 
   return (
-    <ChatContainer initial={{ width: '0%' }} animate={{ width: showChat ? '100%' : '0px' }}>
-      <ChatToggleButton onClick={toggleChat}>OK</ChatToggleButton>
+    <ChatContainer initial={{ width: '0%' }} animate={{ width: showChat ? '400px' : '0px' }}>
       <MessageList ref={messageListRef}>
         {groupedMessages.map((group, index) => (
           <MessageWrapper key={index}>
@@ -143,9 +139,9 @@ export const Chat = ({ roomId, showChat, toggleChat }) => {
           </MessageWrapper>
         ))}
         {!isAtBottom && showChat && (
-          <button style={{ position: 'absolute', bottom: '100px', right: '0px' }} onClick={scrollToBottom}>
-            scr
-          </button>
+          <IconButton style={{ position: 'absolute', bottom: '120px', right: '10px' }} onClick={scrollToBottom}>
+            <ArrowDownIcon />
+          </IconButton>
         )}
       </MessageList>
       <MessageInput sendMessage={sendMessage} />

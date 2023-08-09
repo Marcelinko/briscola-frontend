@@ -1,31 +1,39 @@
 import { ReactComponent as ChatIcon } from 'assets/icons/chat.svg';
 import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
-import { ReactComponent as HelpIcon } from 'assets/icons/help.svg';
 import { ReactComponent as LeaveIcon } from 'assets/icons/leave.svg';
 import { ReactComponent as ShuffleIcon } from 'assets/icons/shuffle.svg';
 import { ModalContext } from 'context/ModalContext';
 import { SocketContext } from 'context/SocketContext';
-import { AnimatePresence } from 'framer-motion';
 import { useContext, useState } from 'react';
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { IconButtonV2 } from 'components/Reusable/IconButtonV2';
-import Tooltip from 'components/Reusable/Tooltip';
+import IconButton from 'components/Reusable/IconButton';
 import { Chat } from 'components/Room/Chat/Chat';
-import Footer from 'components/Room/Footer';
 import Navbar from 'components/Room/Navbar';
 import { TestBoard } from 'components/Room/TestBoard';
 
 const RoomContainer = styled.div`
-  padding: 0px 30px;
   display: flex;
-  flex-direction: column;
   width: 100%;
   height: 100%;
+`;
+
+const RoomWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  margin: 0px 50px;
+  align-items: center;
+`;
+
+const GameContainer = styled.div`
+  display: flex;
+  flex-direction: column;
   max-width: 1400px;
-  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
 `;
 
 const UrlContainer = styled.div`
@@ -61,7 +69,7 @@ const CopiedContainer = styled.div`
 
 export const Room = () => {
   const [room, setRoom] = useState([]);
-  const [showChat, setShowChat] = useState(true);
+  const [showChat, setShowChat] = useState(false);
   const [urlCopied, setUrlCopied] = useState(false);
 
   const location = useLocation();
@@ -107,7 +115,6 @@ export const Room = () => {
       navigate('/', { replace: true });
     }
     socket.on('room:update', (room) => {
-      console.log(room);
       setRoom(room);
     });
 
@@ -129,39 +136,28 @@ export const Room = () => {
 
   return (
     <RoomContainer>
-      <Navbar>
-        <Tooltip text="Izhod">
-          <IconButtonV2 onClick={leaveRoom}>
-            <LeaveIcon />
-          </IconButtonV2>
-        </Tooltip>
-        <UrlContainer>{`${process.env.REACT_APP_URL}/?id=${room.id}`}</UrlContainer>
-        <Tooltip text="Kopiraj povezavo">
-          <IconButtonV2 onClick={copyUrl}>
-            <CopyIcon />
-          </IconButtonV2>
-        </Tooltip>
-        <Tooltip text="Premešaj ekipe">
-          <IconButtonV2 onClick={shuffleUsers}>
-            <ShuffleIcon />
-          </IconButtonV2>
-        </Tooltip>
-        <Tooltip text="Pogovor">
-          <IconButtonV2 onClick={toggleChat}>
-            <ChatIcon />
-          </IconButtonV2>
-        </Tooltip>
-      </Navbar>
-      <TestBoard roomId={room.id} users={room.users} owner={room.owner} />
-      <Footer>
-        <Tooltip text="Pomoč" position="top">
-          <IconButtonV2>
-            <HelpIcon />
-          </IconButtonV2>
-        </Tooltip>
-      </Footer>
-      <AnimatePresence>{showChat && <Chat roomId={room.id} showChat={showChat} toggleChat={toggleChat} />}</AnimatePresence>
+      <RoomWrapper>
+        <GameContainer>
+          <Navbar>
+            <IconButton onClick={leaveRoom} tooltipText="Izhod">
+              <LeaveIcon />
+            </IconButton>
+            <UrlContainer>{`${process.env.REACT_APP_URL}/?id=${room.id}`}</UrlContainer>
+            <IconButton onClick={copyUrl} tooltipText="Kopiraj povezavo">
+              <CopyIcon />
+            </IconButton>
+            <IconButton onClick={shuffleUsers} tooltipText="Premešaj ekipe">
+              <ShuffleIcon />
+            </IconButton>
+            <IconButton onClick={toggleChat} tooltipText="Pogovor">
+              <ChatIcon />
+            </IconButton>
+          </Navbar>
+          <TestBoard roomId={room.id} users={room.users} owner={room.owner} />
+        </GameContainer>
+      </RoomWrapper>
       {urlCopied && <CopiedContainer>Povezava kopirana</CopiedContainer>}
+      <Chat roomId={room.id} showChat={showChat} toggleChat={toggleChat} />
     </RoomContainer>
   );
 };

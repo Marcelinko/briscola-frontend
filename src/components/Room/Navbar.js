@@ -5,7 +5,8 @@ const Nav = styled.div`
   padding: 30px 0px;
   margin-bottom: 30px;
   gap: 15px;
-  > div:last-child {
+
+  > :last-child {
     margin-left: auto;
   }
 `;

@@ -31,6 +31,8 @@ const lightTheme = {
   accent: '#724CF9',
   normal: '#b1bece',
   green: '#3EC300',
+  yellow: '#FFE74C',
+  red: '#F72C25',
 };
 
 function App() {

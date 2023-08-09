@@ -53,6 +53,7 @@ const TooltipText = styled.span`
 
 const TooltipWrapper = styled.div`
   position: relative;
+  width: fit-content;
   &:hover ${TooltipText} {
     display: block;
   }
