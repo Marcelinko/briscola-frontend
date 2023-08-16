@@ -22,7 +22,7 @@ const StyledApp = styled.div`
   //TODO: Change font size in html
 `;
 
-const lightTheme = {
+const darkTheme = {
   text: '#fff',
   background: '#161C23',
   primary: '#FE9000',
@@ -37,7 +37,7 @@ const lightTheme = {
 
 function App() {
   return (
-    <ThemeProvider theme={lightTheme}>
+    <ThemeProvider theme={darkTheme}>
       <StyledApp>
         <ModalContextProvider>
           <SocketContextProvider>

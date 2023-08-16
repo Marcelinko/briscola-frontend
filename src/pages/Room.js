@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { DefaultModal } from 'components/Modal/DefaultModal';
 import IconButton from 'components/Reusable/IconButton';
 import { Chat } from 'components/Room/Chat/Chat';
 import Navbar from 'components/Room/Navbar';
@@ -98,7 +99,7 @@ export const Room = () => {
   const shuffleUsers = () => {
     socket.emit('room:shuffleUsers', { roomId: room.id }, (err) => {
       if (err) {
-        openModal(<p>{err.error}</p>);
+        openModal(<DefaultModal text={err.error} />);
       }
     });
   };

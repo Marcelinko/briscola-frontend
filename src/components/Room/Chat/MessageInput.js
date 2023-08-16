@@ -34,7 +34,7 @@ const Input = styled.textarea`
   max-height: 120px;
   padding: 0px;
   scrollbar-width: none;
-  font-size: 16px;
+  font-size: 0.9rem;
   padding-top: 10px;
   box-sizing: border-box;
   font-family: inherit;

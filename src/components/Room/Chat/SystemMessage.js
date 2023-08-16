@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 const MessageText = styled.p`
   padding: 0px;
@@ -10,11 +10,12 @@ const MessageText = styled.p`
 `;
 
 export const SystemMessage = ({ message }) => {
+  const theme = useTheme();
   const colorMap = {
-    kick: '#EB2A77',
-    join: '#89D76B',
-    leave: '#3656FF',
-    win: '#FBBF2D',
+    kick: theme.red,
+    join: theme.green,
+    leave: theme.accent,
+    win: theme.primary,
   };
   const color = colorMap[message.type];
   return <MessageText color={color}>{message.message}</MessageText>;

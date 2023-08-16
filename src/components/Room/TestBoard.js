@@ -11,6 +11,7 @@ import CapsuleTimer from 'components/Reusable/CapsuleTimer';
 import IconButton from 'components/Reusable/IconButton';
 import { Player } from 'components/Room/Player';
 
+import { Deck } from './Deck';
 import Footer from './Footer';
 
 const GameContainer = styled.div`
@@ -44,6 +45,13 @@ const Board = styled.div`
     linear-gradient(60deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1)),
     linear-gradient(120deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1));
   background-size: 70px 120px;
+`;
+
+const DeckArea = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 `;
 
 const HandContainer = styled.div`
@@ -207,11 +215,13 @@ export const TestBoard = ({ roomId, users, owner }) => {
     <GameContainer>
       <Board>
         {renderPlayers()}
-        {game && (
-          <button onClick={startGame} style={{ position: 'absolute', top: '50%', left: '50%' }}>
-            Začni igro
-          </button>
-        )}
+        <DeckArea>
+          {isRoomOwner && !game?.gameActive ? (
+            <Button onClick={startGame}>Začni igro</Button>
+          ) : (
+            <Deck cardsLeft={20} trumpCard={game.trumpCard} />
+          )}
+        </DeckArea>
       </Board>
       <Footer>
         <IconButton tooltipText="Pomoč" tooltipPos="top">
