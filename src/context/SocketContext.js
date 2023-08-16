@@ -13,7 +13,7 @@ const SocketContextProvider = ({ children }) => {
   const navigate = useNavigate();
   const { openModal } = useContext(ModalContext);
   useEffect(() => {
-    const newSocket = io('http://localhost:3000');
+    const newSocket = io(process.env.REACT_APP_SERVER_URL);
     setSocket(newSocket);
     newSocket.on('disconnect', () => {
       navigate('/');
