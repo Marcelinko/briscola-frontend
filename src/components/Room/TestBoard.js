@@ -7,7 +7,6 @@ import styled from 'styled-components';
 
 import BriscolaCard from 'components/Reusable/BriscolaCard';
 import { Button } from 'components/Reusable/Button';
-import CapsuleTimer from 'components/Reusable/CapsuleTimer';
 import IconButton from 'components/Reusable/IconButton';
 import { Player } from 'components/Room/Player';
 
